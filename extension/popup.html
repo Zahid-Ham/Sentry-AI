@@ -8,6 +8,7 @@
       href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@400;600&display=swap"
       rel="stylesheet"
     />
+    <script src="jspdf.min.js"></script>
     <style>
       :root {
         --bg-gradient: linear-gradient(135deg, #050505, #1a1a2e, #16213e);
@@ -20,7 +21,7 @@
 
       body {
         width: 340px;
-        height: 480px;
+        height: 540px; /* Slightly increased for extra button */
         margin: 0;
         padding: 24px;
         background: var(--bg-gradient);
@@ -29,7 +30,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-start;
         overflow: hidden;
         box-sizing: border-box;
       }
@@ -40,7 +41,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         border-bottom: 1px solid var(--border);
         padding-bottom: 15px;
       }
@@ -55,8 +56,6 @@
         -webkit-text-fill-color: transparent;
         color: white;
       }
-
-      /* NEW CLOSE BUTTON */
       .close-icon {
         cursor: pointer;
         color: #666;
@@ -68,8 +67,39 @@
         color: #fff;
       }
 
-      /* NORMAL UI (Blue) */
-      #normal-ui {
+      /* NAVIGATION TABS */
+      .nav-bar {
+        width: 100%;
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .btn-small {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border);
+        color: #aaa;
+        padding: 8px;
+        font-size: 11px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: "Chakra Petch", sans-serif;
+        text-transform: uppercase;
+        transition: all 0.2s;
+      }
+      .btn-small:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      .btn-small.active {
+        background: rgba(0, 242, 255, 0.1);
+        border-color: var(--neon-blue);
+        color: var(--neon-blue);
+        font-weight: bold;
+      }
+
+      /* UI SECTIONS */
+      .ui-section {
         width: 100%;
         height: 100%;
         display: flex;
@@ -78,6 +108,7 @@
         justify-content: space-between;
       }
 
+      /* NORMAL MONITOR UI */
       .shield-container {
         position: relative;
         width: 140px;
@@ -87,7 +118,6 @@
         align-items: center;
         margin: 10px 0;
       }
-
       .shield-ring {
         position: absolute;
         width: 100%;
@@ -99,7 +129,6 @@
         transform: scale(0.8);
         transition: all 0.5s ease;
       }
-
       .pulse-active .shield-ring {
         animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
         border-width: 2px;
@@ -108,13 +137,11 @@
       .pulse-active .shield-ring:nth-child(2) {
         animation-delay: 0.8s;
       }
-
       .shield-icon {
         font-size: 60px;
         z-index: 2;
         filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.3));
       }
-
       .status-box {
         text-align: center;
         background: var(--glass);
@@ -123,8 +150,8 @@
         border-radius: 12px;
         width: 100%;
         backdrop-filter: blur(10px);
+        margin-top: 10px;
       }
-
       .status-label {
         font-size: 10px;
         text-transform: uppercase;
@@ -132,7 +159,6 @@
         margin-bottom: 6px;
         font-weight: 600;
       }
-
       .status-indicator {
         font-family: "Chakra Petch", sans-serif;
         font-weight: 700;
@@ -141,12 +167,45 @@
         text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
       }
 
+      /* EVIDENCE HISTORY UI */
+      #history-ui {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        justify-content: flex-start;
+      }
+      #history-list {
+        width: 100%;
+        height: 240px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+        padding-right: 5px;
+      }
+      #history-list::-webkit-scrollbar {
+        width: 4px;
+      }
+      #history-list::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 2px;
+      }
+
+      .history-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        border-left: 3px solid var(--neon-red);
+        transition: background 0.2s;
+      }
+      .history-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
       /* BUTTONS */
       .btn-container {
         width: 100%;
         margin-top: 20px;
       }
-
       .btn-main {
         width: 100%;
         padding: 16px;
@@ -162,10 +221,6 @@
         text-transform: uppercase;
         letter-spacing: 1px;
       }
-      .btn-main:hover {
-        transform: translateY(-2px);
-      }
-
       .btn-stop {
         background: rgba(255, 0, 85, 0.1);
         border: 1px solid rgba(255, 0, 85, 0.3);
@@ -173,9 +228,27 @@
         display: none;
         box-shadow: none;
       }
-      .btn-stop:hover {
-        background: rgba(255, 0, 85, 0.2);
-        box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+      .btn-report {
+        background: linear-gradient(90deg, #ffaa00, #ff7700);
+        box-shadow: 0 5px 15px rgba(255, 119, 0, 0.3);
+        margin-top: 10px;
+      }
+      .btn-clear {
+        background: transparent;
+        border: 1px solid #444;
+        color: #888;
+        width: 100%;
+        padding: 8px;
+        margin-top: 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 10px;
+        text-transform: uppercase;
+        transition: all 0.2s;
+      }
+      .btn-clear:hover {
+        border-color: #666;
+        color: #bbb;
       }
 
       /* RED ALERT UI */
@@ -278,7 +351,12 @@
       <div class="close-icon" id="close-popup">×</div>
     </div>
 
-    <div id="normal-ui">
+    <div class="nav-bar">
+      <button id="view-home" class="btn-small active">Live Monitor</button>
+      <button id="view-history" class="btn-small">Evidence Log</button>
+    </div>
+
+    <div id="normal-ui" class="ui-section">
       <div class="shield-container" id="shieldContainer">
         <div class="shield-ring"></div>
         <div class="shield-ring"></div>
@@ -298,6 +376,29 @@
       </div>
     </div>
 
+    <div id="history-ui" class="ui-section">
+      <div id="history-list">
+        <p
+          style="
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-top: 20px;
+          "
+        >
+          No threats recorded yet.
+        </p>
+      </div>
+      <div style="width: 100%">
+        <button id="download-report" class="btn-main btn-report">
+          📄 DOWNLOAD POLICE REPORT
+        </button>
+        <button id="clear-history" class="btn-clear">
+          ❌ CLEAR ALL EVIDENCE
+        </button>
+      </div>
+    </div>
+
     <div id="alert-ui">
       <div class="alert-box">
         <div class="alert-icon">🚨</div>
@@ -310,6 +411,6 @@
       </div>
     </div>
 
-    <script src="popup.js"></script>
+    <script type="module" src="popup.js"></script>
   </body>
 </html>

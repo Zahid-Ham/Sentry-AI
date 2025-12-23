@@ -2,12 +2,13 @@ const params = new URLSearchParams(window.location.search);
 const streamId = params.get("streamId");
 const SERVER_URL = "ws://localhost:8000/ws/user-session-1";
 
-// Settings
-const RECORD_INTERVAL = 5000; // 5 Seconds per analysis
+// 3 Seconds = Faster detection, valid files, no backend errors
+const RECORD_INTERVAL = 3000;
 
 let socket = null;
 let mediaRecorder = null;
-let audioContext = null;
+let globalStream = null;
+let currentTranscript = "";
 
 // --- LOGGING ---
 const logText = document.getElementById("logText");
@@ -19,103 +20,125 @@ function log(msg) {
   }
 }
 
-// --- 1. CONNECT ---
+// --- 1. CONNECT TO BRAIN ---
 function connectSocket() {
   socket = new WebSocket(SERVER_URL);
 
   socket.onopen = () => {
-    const statusText = document.getElementById("statusText");
-    if (statusText) {
-      statusText.innerText = "● PROTECTED CONNECTION";
-      statusText.style.color = "#00f2ff";
-    }
-    log("Connected. Starting Audio Loop...");
-    startRecordingLoop();
+    document.getElementById("statusText").innerText = "● PROTECTED CONNECTION";
+    document.getElementById("statusText").style.color = "#00f2ff";
+    log("Connected. Protection Active.");
+    startRecordingLoop(); // Start the loop
   };
 
   socket.onmessage = (e) => {
     try {
       const data = JSON.parse(e.data);
 
-      // A. SHOW TRANSCRIPT (Visual Feedback)
+      // A. LIVE TRANSCRIPT
       if (data.type === "TRANSCRIPT_SHOW") {
+        currentTranscript = data.text;
         log(`🗣️ Heard: "${data.text}"`);
       }
 
-      // --- B. CRITICAL FIX: FORWARD VERDICT TO BACKGROUND ---
+      // B. THREAT VERDICT
       if (data.type === "VERDICT") {
-        console.log("⚡ Verdict Received:", data.payload);
-        log(`⚡ Analysis: Score ${data.payload.threat_score}`);
+        const analysis = data.payload;
 
-        // Send this to background.js so it can open the popup
-        chrome.runtime.sendMessage({
-          type: "VERDICT",
-          payload: data.payload,
-        });
+        if (analysis.threat_score > 5 || analysis.is_threat === true) {
+          console.log("🚨 THREAT DETECTED!");
+
+          // CAPTURE EVIDENCE & ALERT IMMEDIATELY
+          captureEvidence(async (screenshotUrl) => {
+            // 1. SAVE TO HISTORY
+            const newEntry = {
+              id: Date.now(),
+              timestamp: new Date().toLocaleString(),
+              threat_score: analysis.threat_score,
+              reason: analysis.reason,
+              transcript: currentTranscript || "Audio Detected",
+              screenshot: screenshotUrl,
+            };
+
+            const { history } = await chrome.storage.local.get(["history"]);
+            // Add new entry to top of list
+            const updated = [newEntry, ...(history || [])].slice(0, 50);
+            await chrome.storage.local.set({ history: updated });
+
+            // 2. OPEN POPUP INSTANTLY
+            const popupUrl =
+              chrome.runtime.getURL("popup.html") +
+              `?alert=true&score=${
+                analysis.threat_score
+              }&reason=${encodeURIComponent(analysis.reason)}`;
+
+            chrome.windows.create({
+              url: popupUrl,
+              type: "popup",
+              width: 380,
+              height: 540,
+              focused: true,
+            });
+          });
+        }
       }
     } catch (err) {
-      console.error("Error parsing message:", err);
-    }
-  };
-
-  socket.onclose = () => {
-    log("⚠️ Disconnected from Brain");
-    const statusText = document.getElementById("statusText");
-    if (statusText) {
-      statusText.innerText = "● DISCONNECTED";
-      statusText.style.color = "red";
+      console.error(err);
     }
   };
 }
 
-// --- 2. THE RECORDING LOOP ---
+// --- 2. THE STABLE LOOP (Critical Fix) ---
 async function startRecordingLoop() {
   if (!mediaRecorder || mediaRecorder.state === "inactive") {
     try {
+      // Start recording a NEW file (this creates a valid header every time)
       mediaRecorder.start();
       log("Listening...");
 
-      // Stop after 5 seconds (This forces a valid file creation)
+      // Stop after 3 seconds to send the file
       setTimeout(() => {
         if (mediaRecorder.state === "recording") {
           mediaRecorder.stop();
         }
       }, RECORD_INTERVAL);
     } catch (err) {
-      console.error("Recorder Error:", err);
+      console.error(err);
     }
   }
 }
 
-// --- 3. SETUP ---
+// --- 3. STARTUP ---
 async function startSentry() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
         mandatory: { chromeMediaSource: "tab", chromeMediaSourceId: streamId },
       },
-      video: false,
+      video: {
+        mandatory: { chromeMediaSource: "tab", chromeMediaSourceId: streamId },
+      },
     });
+    globalStream = stream;
 
-    // Loopback (Hear the audio)
-    audioContext = new AudioContext();
+    // Play audio locally
+    const audioContext = new AudioContext();
     const source = audioContext.createMediaStreamSource(stream);
     source.connect(audioContext.destination);
 
     // Setup Recorder
-    mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+    const audioStream = new MediaStream(stream.getAudioTracks());
+    mediaRecorder = new MediaRecorder(audioStream, { mimeType: "audio/webm" });
 
-    // When it stops, we get a FULL VALID FILE
+    // When recorder stops (every 3s), send data and RESTART
     mediaRecorder.ondataavailable = (e) => {
       if (e.data.size > 0 && socket?.readyState === WebSocket.OPEN) {
-        // Send raw bytes to backend
-        socket.send(e.data);
-        log(`📡 Sent Packet (${e.data.size} bytes)`);
+        socket.send(e.data); // Valid file sent to backend
       }
     };
 
-    // Immediately restart after sending
     mediaRecorder.onstop = () => {
+      // Immediately restart to catch the next sentence
       startRecordingLoop();
     };
 
@@ -125,8 +148,23 @@ async function startSentry() {
   }
 }
 
-if (streamId) {
-  startSentry();
-} else {
-  log("❌ Critical Error: No Stream ID");
+if (streamId) startSentry();
+
+// --- HELPER: SCREENSHOT ---
+function captureEvidence(callback) {
+  if (!globalStream || globalStream.getVideoTracks().length === 0) {
+    callback(null);
+    return;
+  }
+  const imageCapture = new ImageCapture(globalStream.getVideoTracks()[0]);
+  imageCapture
+    .grabFrame()
+    .then((bitmap) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      canvas.getContext("2d").drawImage(bitmap, 0, 0);
+      callback(canvas.toDataURL("image/jpeg", 0.7));
+    })
+    .catch(() => callback(null));
 }
