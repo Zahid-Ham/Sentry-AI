@@ -1,4 +1,4 @@
-# --- PYTHON & BACKEND ---
+# --- PYTHON JUNK ---
 __pycache__/
 *.pyc
 *.pyo
@@ -6,39 +6,29 @@ __pycache__/
 .Python
 env/
 venv/
+clean_build_env/
 .env
-env.txt
-pip-log.txt
-pip-delete-this-directory.txt
 
-# --- AI MODELS & LARGE BINARIES ---
-# These are too big for GitHub. Users should download them manually.
+# --- BUILD ARTIFACTS (From your .exe attempts) ---
+build/
+dist/
+*.spec
+
+# --- LARGE BINARIES & MODELS ---
+# Users must download these manually
 backend/model/
 backend/ffmpeg.exe
 backend/ffprobe.exe
 backend/ffplay.exe
 
-# --- RUNTIME / TEMP FILES ---
-# Audio chunks generated during detection
-backend/temp_audio/
+# --- MEDIA & LOGS ---
+*.log
 backend/*.wav
-backend/*.mp3
 backend/*.webm
-last_chunk.wav
+SentryAI_Police_Report_*.txt
+SentryAI_Evidence_*.pdf
 
-# --- VS CODE & IDE SETTINGS ---
+# --- IDE SETTINGS ---
 .vscode/
 .idea/
 *.swp
-*.swo
-
-# --- OS SYSTEM FILES ---
-.DS_Store
-Thumbs.db
-ehthumbs.db
-desktop.ini
-
-# --- LOGS & REPORTS ---
-*.log
-SentryAI_Police_Report_*.txt
-Cyber_Report_*.txt
