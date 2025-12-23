@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "SentryAI: Digital Arrest Interceptor",
+  "version": "1.0",
+  "description": "Real-time AI detection for Digital Arrest fraud calls.",
+  "permissions": [
+    "tabCapture",
+    "scripting",
+    "activeTab",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["monitor.html", "popup.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

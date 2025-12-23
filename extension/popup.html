@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SentryAI Protection</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-gradient: linear-gradient(135deg, #050505, #1a1a2e, #16213e);
+        --neon-blue: #00f2ff;
+        --neon-red: #ff0055;
+        --glass: rgba(255, 255, 255, 0.03);
+        --border: rgba(255, 255, 255, 0.08);
+        --text-main: #e0e0e0;
+      }
+
+      body {
+        width: 340px;
+        height: 480px;
+        margin: 0;
+        padding: 24px;
+        background: var(--bg-gradient);
+        font-family: "Inter", sans-serif;
+        color: var(--text-main);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+
+      /* HEADER */
+      .header {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 15px;
+      }
+      .logo {
+        font-family: "Chakra Petch", sans-serif;
+        font-weight: 700;
+        font-size: 20px;
+        letter-spacing: 2px;
+        background: linear-gradient(to right, #fff, var(--neon-blue));
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: white;
+      }
+
+      /* NEW CLOSE BUTTON */
+      .close-icon {
+        cursor: pointer;
+        color: #666;
+        font-size: 24px;
+        line-height: 1;
+        transition: color 0.2s;
+      }
+      .close-icon:hover {
+        color: #fff;
+      }
+
+      /* NORMAL UI (Blue) */
+      #normal-ui {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .shield-container {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 10px 0;
+      }
+
+      .shield-ring {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 1px solid var(--neon-blue);
+        box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.5s ease;
+      }
+
+      .pulse-active .shield-ring {
+        animation: pulse 2.5s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        border-width: 2px;
+        box-shadow: 0 0 30px var(--neon-blue);
+      }
+      .pulse-active .shield-ring:nth-child(2) {
+        animation-delay: 0.8s;
+      }
+
+      .shield-icon {
+        font-size: 60px;
+        z-index: 2;
+        filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.3));
+      }
+
+      .status-box {
+        text-align: center;
+        background: var(--glass);
+        border: 1px solid var(--border);
+        padding: 16px;
+        border-radius: 12px;
+        width: 100%;
+        backdrop-filter: blur(10px);
+      }
+
+      .status-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+
+      .status-indicator {
+        font-family: "Chakra Petch", sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        color: #fff;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      }
+
+      /* BUTTONS */
+      .btn-container {
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .btn-main {
+        width: 100%;
+        padding: 16px;
+        border-radius: 8px;
+        border: none;
+        background: linear-gradient(90deg, #00c6ff, #0072ff);
+        color: white;
+        font-family: "Chakra Petch", sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .btn-main:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn-stop {
+        background: rgba(255, 0, 85, 0.1);
+        border: 1px solid rgba(255, 0, 85, 0.3);
+        color: var(--neon-red);
+        display: none;
+        box-shadow: none;
+      }
+      .btn-stop:hover {
+        background: rgba(255, 0, 85, 0.2);
+        box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
+      }
+
+      /* RED ALERT UI */
+      #alert-ui {
+        display: none;
+        width: 100%;
+        height: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        animation: shake 0.5s ease-in-out;
+      }
+      .alert-box {
+        width: 100%;
+        padding: 30px;
+        background: rgba(255, 0, 85, 0.1);
+        border: 2px solid var(--neon-red);
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 0 50px rgba(255, 0, 85, 0.2);
+        box-sizing: border-box;
+      }
+      .alert-icon {
+        font-size: 60px;
+        margin-bottom: 15px;
+        animation: pulseRed 1s infinite;
+      }
+      .threat-title {
+        color: var(--neon-red);
+        font-family: "Chakra Petch", sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+      }
+      .threat-score {
+        font-size: 14px;
+        color: #ffcccc;
+        margin: 10px 0 20px 0;
+      }
+      .threat-reason {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        color: #fff;
+        margin-bottom: 20px;
+        border-left: 3px solid var(--neon-red);
+        text-align: left;
+      }
+      .btn-dismiss {
+        background: var(--neon-red);
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 14px;
+        border-radius: 8px;
+        font-family: "Chakra Petch", sans-serif;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(0.9);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1.6);
+          opacity: 0;
+        }
+      }
+      @keyframes pulseRed {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="logo">SENTRY.AI</div>
+      <div class="close-icon" id="close-popup">×</div>
+    </div>
+
+    <div id="normal-ui">
+      <div class="shield-container" id="shieldContainer">
+        <div class="shield-ring"></div>
+        <div class="shield-ring"></div>
+        <div class="shield-icon">🛡️</div>
+      </div>
+
+      <div class="status-box">
+        <div class="status-label">SYSTEM STATUS</div>
+        <div class="status-indicator" id="statusText">SYSTEM IDLE</div>
+      </div>
+
+      <div class="btn-container">
+        <button id="start-btn" class="btn-main">INITIALIZE INTERCEPTOR</button>
+        <button id="stop-btn" class="btn-main btn-stop">
+          DEACTIVATE MONITORING
+        </button>
+      </div>
+    </div>
+
+    <div id="alert-ui">
+      <div class="alert-box">
+        <div class="alert-icon">🚨</div>
+        <h2 class="threat-title">THREAT DETECTED</h2>
+        <div class="threat-score">
+          Risk Score: <span id="score-val">0</span>/100
+        </div>
+        <div class="threat-reason" id="alert-reason">Analyzing...</div>
+        <button id="reset-btn" class="btn-dismiss">DISMISS ALERT</button>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
