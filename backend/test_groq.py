@@ -3,7 +3,7 @@ import os
 from groq import AsyncGroq
 
 # PASTE YOUR KEY DIRECTLY HERE FOR TESTING
-API_KEY = "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" 
+API_KEY = "gsk_" 
 
 async def test_connection():
     print(f"🔑 Testing API Key: {API_KEY[:10]}...")
