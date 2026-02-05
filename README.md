@@ -66,15 +66,21 @@ SentryAI_Project/
    - Extract/Unzip the downloaded file to a folder on your Desktop.
 
 **2. Run the Backend:**
-   - Open the folder and double-click `SentryAI_Server.exe`.
-   - A window will appear saying "SentryAI Server running...". Keep this open.
+   - Open the extracted folder.
+   - Double-click `SentryAI_Server.exe` (Application).
+   - A window will appear saying "SentryAI Server running...". **Keep this open.**
 
 **3. Install the Extension:**
-   - Open Chrome -> `chrome://extensions`.
-   - Turn on **Developer Mode** (top right).
-   - Click **"Load Unpacked"** and select the `extension` folder included in the download.
+   - Open Chrome and type `chrome://extensions` in the address bar.
+   - Turn on **Developer Mode** (toggle in the top right corner).
+   - Click **"Load Unpacked"** (top left button).
+   - Navigate to the extracted **SentryAI_Server** folder and select the **`extension`** folder inside it.
 
-**That's it!** The icon will turn blue/green when connected.
+**4. Connect:**
+   - click the 🛡️ SentryAI icon in your toolbar.
+   - It should say "Connected" and the icon will turn blue/green.
+
+**That's it! You are protected.** 🛡️
 
 ---
 
