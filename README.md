@@ -62,8 +62,8 @@ SentryAI_Project/
 ### Option 1: For End Users (No Coding Required)
 
 **1. Download the Application:**
-   - Get the `SentryAI_Server.zip` from your provider.
-   - Extract/Unzip it to a folder on your Desktop.
+   - 📥 [**Click here to Download SentryAI Server (v1.0)**](https://github.com/Zahid-Ham/Sentry-AI/releases/download/v1.0/SentryAI_Server.zip)
+   - Extract/Unzip the downloaded file to a folder on your Desktop.
 
 **2. Run the Backend:**
    - Open the folder and double-click `SentryAI_Server.exe`.
