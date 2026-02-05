@@ -57,7 +57,28 @@ SentryAI_Project/
 
 ---
 
-## 🚀 Installation Guide (For Developers)
+## 🚀 Installation Guide
+
+### Option 1: For End Users (No Coding Required)
+
+**1. Download the Application:**
+   - Get the `SentryAI_Server.zip` from your provider.
+   - Extract/Unzip it to a folder on your Desktop.
+
+**2. Run the Backend:**
+   - Open the folder and double-click `SentryAI_Server.exe`.
+   - A window will appear saying "SentryAI Server running...". Keep this open.
+
+**3. Install the Extension:**
+   - Open Chrome -> `chrome://extensions`.
+   - Turn on **Developer Mode** (top right).
+   - Click **"Load Unpacked"** and select the `extension` folder included in the download.
+
+**That's it!** The icon will turn blue/green when connected.
+
+---
+
+### Option 2: For Developers (Source Code)
 
 Follow these steps to set up the project locally.
 

@@ -48,6 +48,7 @@ python main.py
 ```
 
 **You should see:**
+
 ```
 🚀 Loading Vosk Model...
 ✅ Vosk Loaded! (Ready for Hindi/English)
@@ -86,6 +87,7 @@ INFO:     Uvicorn running on http://0.0.0.0:8000
 ## ❌ Troubleshooting
 
 ### Backend won't start
+
 ```
 Error: ModuleNotFoundError: No module named 'vosk'
 → Did you activate the virtual environment?
@@ -93,6 +95,7 @@ Error: ModuleNotFoundError: No module named 'vosk'
 ```
 
 ### "Connection refused"
+
 ```
 Error: ConnectionRefusedError
 → Is backend.py still running? (See terminal with "Uvicorn running")
@@ -100,6 +103,7 @@ Error: ConnectionRefusedError
 ```
 
 ### GROQ_API_KEY missing
+
 ```
 Error: ❌ ERROR: GROQ_API_KEY not found in .env file!
 → Create .env file in backend/ folder
@@ -108,6 +112,7 @@ Error: ❌ ERROR: GROQ_API_KEY not found in .env file!
 ```
 
 ### Extension shows "Connection Error"
+
 ```
 → Check that backend is running (see terminal)
 → Check .env file has valid GROQ_API_KEY
@@ -115,6 +120,7 @@ Error: ❌ ERROR: GROQ_API_KEY not found in .env file!
 ```
 
 ### No speech detected
+
 ```
 → Give microphone permission when browser asks
 → Try speaking louder/closer to mic
@@ -127,15 +133,18 @@ Error: ❌ ERROR: GROQ_API_KEY not found in .env file!
 ## 📊 How to Monitor
 
 **Backend Terminal:**
+
 - Shows incoming connections
 - Shows detected speech
 - Shows threat analysis results
 
 **Browser Console (F12):**
+
 - Shows any JavaScript errors
 - Shows WebSocket connection status
 
 **Monitor Window:**
+
 - "● PROTECTED CONNECTION" = Connected
 - "🗣️ Heard: [text]" = Speech detected
 - "📊 [score]" = Analysis result
