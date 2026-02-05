@@ -98,8 +98,8 @@ Follow these steps to set up the project locally.
 1.  **Clone the Repository:**
 
     ```bash
-    git clone [https://github.com/YOUR_USERNAME/SentryAI.git](https://github.com/YOUR_USERNAME/SentryAI.git)
-    cd SentryAI/backend
+    git clone https://github.com/Zahid-Ham/Sentry-AI.git
+    cd Sentry-AI/backend
     ```
 
 2.  **Install Dependencies:**
