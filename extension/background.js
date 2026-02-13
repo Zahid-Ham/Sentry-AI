@@ -3,11 +3,24 @@ console.log("✅ SentryAI Service Worker STARTED");
 
 let monitorWindowId = null;
 
+// Regular expression for valid tab IDs
+const tabIdRegex = /^[0-9]+$/;
+//Zahid Hamdule
+
+// Regular expression for valid stream IDs
+const streamIdRegex = /^[a-zA-Z0-9_-]+$/;
+
 // The Background Script now acts as the "Enforcer"
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // --- A. START COMMAND ---
   if (message.type === "START_SENTRY") {
     console.log("🟢 Starting Monitor...");
+
+    // Validate tabId using regular expression
+    if (!tabIdRegex.test(message.tabId)) {
+      console.error(`Invalid tab ID: ${message.tabId}. Only numeric values are allowed.`);
+      return;
+    }
 
     // 1. Get Stream ID from Tab
     chrome.tabCapture.getMediaStreamId(
@@ -18,10 +31,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           return;
         }
 
+        // Validate streamId using regular expression
+        if (!streamIdRegex.test(streamId)) {
+          console.error(`Invalid stream ID: ${streamId}. Only alphanumeric characters, underscores, and hyphens are allowed.`);
+          return;
+        }
+
         // 2. Open Monitor Window (This file now handles the WebSocket)
         chrome.windows.create(
           {
-            url: `monitor.html?streamId=${streamId}`,
+            url: `monitor.html?streamId=${encodeURIComponent(streamId)}`,
             type: "popup",
             width: 400,
             height: 300,
@@ -49,6 +68,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const analysis = message.payload;
     console.log("📨 Background Received Verdict Score:", analysis.threat_score);
 
+    // Validate analysis
+    if (!analysis || typeof analysis !== "object") {
+      console.error("Invalid analysis");
+      return;
+    }
+
     // TRIGGER LOGIC
     if (analysis.threat_score > 5 || analysis.is_threat === true) {
       console.log("🚨 THREAT CONFIRMED! Launching Alert...");
@@ -66,7 +91,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           const alertUrl =
             chrome.runtime.getURL("popup.html") +
             `?alert=true&score=${
-              analysis.threat_score
+              encodeURIComponent(analysis.threat_score)
             }&reason=${encodeURIComponent(analysis.reason)}`;
 
           chrome.windows.create({
