@@ -21,6 +21,8 @@ document.getElementById('grantBtn').addEventListener('click', async () => {
 
     } catch (err) {
         console.error("Permission Denied:", err);
-        alert("Error: You must click 'Allow' in the top-left popup!");
+        // Instead of using alert with a potentially user-controlled error message,
+        // display a generic error message to the user.
+        alert("Error: Microphone access was denied. Please try again.");
     }
 });
