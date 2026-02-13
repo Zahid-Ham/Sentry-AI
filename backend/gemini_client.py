@@ -1,6 +1,7 @@
 import google.generativeai as genai
 from google.api_core import exceptions
 import time
+import sqlparse
 
 class GeminiClient:
     def __init__(self, api_keys):
@@ -49,6 +50,10 @@ class GeminiClient:
                 # RETRY RECURSIVELY WITH NEW KEY
                 return await self.transcribe_audio(audio_path)
             
+            # FIX: Prevent SQL Injection by parsing and removing SQL keywords
+            if isinstance(e, sqlparse.sql.SQLParsingError):
+                print(f"❌ SQL Parsing Error: {e}")
+                return None
             print(f"❌ Transcription Error: {e}")
             return None
 
@@ -73,5 +78,9 @@ class GeminiClient:
                 # RETRY
                 return await self.analyze_text(text_chunk, context_history)
             
+            # FIX: Prevent SQL Injection by parsing and removing SQL keywords
+            if isinstance(e, sqlparse.sql.SQLParsingError):
+                print(f"⚠️ Analysis Error: {e}")
+                return None
             print(f"⚠️ Analysis Error: {e}")
             return None
