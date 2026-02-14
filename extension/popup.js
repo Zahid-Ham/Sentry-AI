@@ -5,10 +5,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- 0. AUTO-OPEN CHECK ---
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.has("alert")) {
-    showRedAlert({
-      threat_score: urlParams.get("score"),
-      reason: urlParams.get("reason"),
-    });
+    const threatScore = urlParams.get("score");
+    const reason = urlParams.get("reason");
+    if (validateInput(threatScore) && validateInput(reason)) {
+      showRedAlert({
+        threat_score: threatScore,
+        reason: reason,
+      });
+    } else {
+      console.error("Invalid input: threat_score or reason");
+    }
   }
 
   // --- 1. CLOSE & STOP ---
@@ -46,9 +52,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- 5. LISTEN FOR ALERTS ---
   chrome.runtime.onMessage.addListener((request) => {
     if (request.type === "SCAM_ALERT") {
-      showRedAlert(request.payload);
-      if (document.getElementById("history-ui").style.display === "flex")
-        renderHistory();
+      const threatScore = request.payload.threat_score;
+      const reason = request.payload.reason;
+      if (validateInput(threatScore) && validateInput(reason)) {
+        showRedAlert(request.payload);
+        if (document.getElementById("history-ui").style.display === "flex")
+          renderHistory();
+      } else {
+        console.error("Invalid input: threat_score or reason");
+      }
     }
   });
 
@@ -239,6 +251,9 @@ function showRedAlert(data) {
   document.getElementById("score-val").innerText = data.threat_score;
   document.getElementById("alert-reason").innerText = data.reason;
   playAlarm();
+}
+function validateInput(value) {
+  return typeof value === "string" && value.trim() !== "";
 }
 function playAlarm() {
   if (!alarmSound) {
