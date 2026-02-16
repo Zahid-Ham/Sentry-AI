@@ -134,6 +134,15 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                     print(f"🛑 Stop command received from {client_id}")
                     break
 
+            # Fix: Validate the input before passing it to json.loads
+            elif "json" in message:
+                try:
+                    json_data = json.loads(message["json"])
+                    # Process the JSON data
+                    print(f"Received JSON data: {json_data}")
+                except json.JSONDecodeError as e:
+                    print(f"Invalid JSON: {e}")
+
     except Exception as e:
         print(f"⚠️ Critical Error: {e}")
 
