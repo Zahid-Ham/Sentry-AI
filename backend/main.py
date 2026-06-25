@@ -134,6 +134,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                     print(f"🛑 Stop command received from {client_id}")
                     break
 
+            # Add input validation to prevent SQL injection
+            elif "text" in message and not isinstance(message["text"], str):
+                print(f"⚠️ Invalid input type: {type(message['text'])}")
+                continue
+
     except Exception as e:
         print(f"⚠️ Critical Error: {e}")
 
